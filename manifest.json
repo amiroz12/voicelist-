@@ -1,0 +1,20 @@
+{
+  "name": "VoiceList",
+  "short_name": "VoiceList",
+  "description": "הוסף פריטים לרשימות שלך בקול",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f14",
+  "theme_color": "#0f0f14",
+  "orientation": "portrait",
+  "lang": "he",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%235b6fff'/><text y='130' x='96' font-size='110' text-anchor='middle'>🎙️</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

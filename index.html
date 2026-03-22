@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f0f14" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="VoiceList" />
+  <link rel="manifest" href="manifest.json" />
+  <title>VoiceList</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f0f14;
+      --surface: #18181f;
+      --surface2: #22222c;
+      --border: #2e2e3a;
+      --accent: #5b6fff;
+      --accent2: #ff5b8d;
+      --accent-glow: rgba(91,111,255,0.25);
+      --text: #f0f0f8;
+      --text2: #8888aa;
+      --success: #4fffb0;
+      --danger: #ff5b5b;
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'Heebo', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* ── AUTH SCREEN ── */
+    #auth-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100dvh;
+      padding: 2rem;
+      gap: 2rem;
+      background: radial-gradient(ellipse at 60% 0%, rgba(91,111,255,0.15) 0%, transparent 60%),
+                  radial-gradient(ellipse at 10% 90%, rgba(255,91,141,0.1) 0%, transparent 50%),
+                  var(--bg);
+    }
+
+    .logo-area { text-align: center; }
+    .logo-icon {
+      width: 80px; height: 80px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 28px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem;
+      margin: 0 auto 1.2rem;
+      box-shadow: 0 0 40px var(--accent-glow);
+    }
+    .logo-area h1 { font-size: 2rem; font-weight: 900; letter-spacing: -0.5px; }
+    .logo-area p { color: var(--text2); font-size: 0.95rem; margin-top: 0.4rem; }
+
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      width: 100%;
+      max-width: 420px;
+    }
+    .auth-card h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .auth-card p { color: var(--text2); font-size: 0.9rem; margin-bottom: 1.5rem; line-height: 1.6; }
+
+    .step-list { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
+    .step {
+      display: flex; gap: 1rem; align-items: flex-start;
+    }
+    .step-num {
+      width: 28px; height: 28px; min-width: 28px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 700;
+    }
+    .step-text { font-size: 0.88rem; color: var(--text2); line-height: 1.5; padding-top: 4px; }
+    .step-text strong { color: var(--text); }
+    .step-text a { color: var(--accent); text-decoration: none; }
+
+    .input-field {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.9rem 1rem;
+      color: var(--text);
+      font-family: 'Heebo', sans-serif;
+      font-size: 0.95rem;
+      direction: ltr;
+      margin-bottom: 0.8rem;
+      transition: border-color 0.2s;
+    }
+    .input-field:focus { outline: none; border-color: var(--accent); }
+    .input-field::placeholder { color: var(--text2); }
+
+    .btn-primary {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, var(--accent), #7b8fff);
+      border: none;
+      border-radius: 14px;
+      color: #fff;
+      font-family: 'Heebo', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 20px var(--accent-glow);
+    }
+    .btn-primary:active { transform: scale(0.97); }
+
+    /* ── MAIN APP ── */
+    #app-screen { display: none; flex-direction: column; min-height: 100dvh; }
+
+    header {
+      padding: 1.2rem 1.4rem 1rem;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .header-logo { display: flex; align-items: center; gap: 0.6rem; }
+    .header-logo .icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+    }
+    .header-logo span { font-weight: 900; font-size: 1.15rem; }
+    .btn-icon {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 1.1rem;
+      transition: background 0.2s;
+    }
+    .btn-icon:active { background: var(--border); }
+
+    /* ── LIST TABS ── */
+    .list-tabs {
+      display: flex; gap: 0.6rem;
+      padding: 1rem 1.4rem 0.5rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .list-tabs::-webkit-scrollbar { display: none; }
+    .tab {
+      display: flex; align-items: center; gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-family: 'Heebo', sans-serif;
+      font-size: 0.85rem;
+      color: var(--text2);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 2px 12px var(--accent-glow);
+    }
+    .tab .emoji { font-size: 1rem; }
+    .tab .count {
+      background: rgba(255,255,255,0.2);
+      border-radius: 100px;
+      padding: 0 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .tab:not(.active) .count { background: var(--surface2); color: var(--text2); }
+
+    /* ── VOICE BUTTON ── */
+    .voice-section {
+      padding: 1.5rem 1.4rem 1rem;
+      display: flex; flex-direction: column; align-items: center; gap: 1rem;
+    }
+    .voice-btn-wrap { position: relative; }
+    .voice-btn-ring {
+      position: absolute; inset: -12px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      opacity: 0;
+      transform: scale(0.9);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .voice-btn-wrap.listening .voice-btn-ring {
+      opacity: 1; transform: scale(1.1);
+      animation: pulse-ring 1.2s ease-in-out infinite;
+    }
+    @keyframes pulse-ring {
+      0%,100% { transform: scale(1.05); opacity: 0.6; }
+      50% { transform: scale(1.2); opacity: 0.2; }
+    }
+    .voice-btn {
+      width: 88px; height: 88px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #7b8fff);
+      border: none;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      cursor: pointer;
+      box-shadow: 0 0 30px var(--accent-glow);
+      transition: transform 0.15s, box-shadow 0.2s;
+      position: relative; z-index: 1;
+    }
+    .voice-btn:active { transform: scale(0.94); }
+    .voice-btn-wrap.listening .voice-btn {
+      background: linear-gradient(135deg, var(--accent2), #ff8fb0);
+      box-shadow: 0 0 40px rgba(255,91,141,0.35);
+      animation: mic-pulse 0.8s ease-in-out infinite alternate;
+    }
+    @keyframes mic-pulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.06); }
+    }
+
+    .voice-status {
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--text2);
+      min-height: 1.4em;
+      transition: color 0.3s;
+    }
+    .voice-status.active { color: var(--accent2); font-weight: 500; }
+    .voice-status.success { color: var(--success); }
+    .voice-status.error { color: var(--danger); }
+
+    /* live transcript bubble */
+    .transcript-bubble {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0.8rem 1.2rem;
+      font-size: 1rem;
+      width: 100%;
+      max-width: 360px;
+      min-height: 44px;
+      text-align: center;
+      color: var(--text2);
+      transition: border-color 0.2s;
+      display: none;
+    }
+    .transcript-bubble.visible { display: block; }
+    .transcript-bubble.has-text { color: var(--text); border-color: var(--accent); }
+
+    /* ── MANUAL ADD ── */
+    .manual-row {
+      display: flex; gap: 0.6rem;
+      padding: 0 1.4rem 1rem;
+    }
+    .manual-input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-family: 'Heebo', sans-serif;
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+    }
+    .manual-input:focus { outline: none; border-color: var(--accent); }
+    .manual-input::placeholder { color: var(--text2); }
+    .btn-add {
+      background: var(--accent);
+      border: none;
+      border-radius: 12px;
+      width: 44px; height: 44px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      cursor: pointer;
+      box-shadow: 0 2px 10px var(--accent-glow);
+      flex-shrink: 0;
+      transition: transform 0.15s;
+    }
+    .btn-add:active { transform: scale(0.93); }
+
+    /* ── ITEMS LIST ── */
+    .items-section { flex: 1; padding: 0 1.4rem 6rem; }
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.6rem 0 0.8rem;
+    }
+    .section-header h3 { font-size: 0.85rem; color: var(--text2); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
+    .btn-clear { background: none; border: none; color: var(--danger); font-size: 0.8rem; cursor: pointer; font-family: 'Heebo', sans-serif; }
+
+    .items-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .item-card {
+      display: flex; align-items: center; gap: 0.9rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0.9rem 1rem;
+      animation: slide-in 0.25s ease-out;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    @keyframes slide-in {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .item-card.done { opacity: 0.45; }
+    .item-card.done .item-text { text-decoration: line-through; }
+
+    .item-check {
+      width: 24px; height: 24px; min-width: 24px;
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+      background: transparent;
+    }
+    .item-card.done .item-check {
+      background: var(--success);
+      border-color: var(--success);
+      color: #000;
+    }
+    .item-text { flex: 1; font-size: 0.95rem; }
+    .item-meta { font-size: 0.75rem; color: var(--text2); }
+
+    .btn-delete {
+      background: none; border: none;
+      color: var(--text2); font-size: 1rem;
+      cursor: pointer; padding: 4px;
+      transition: color 0.2s;
+    }
+    .btn-delete:active { color: var(--danger); }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text2);
+    }
+    .empty-state .big { font-size: 2.5rem; margin-bottom: 0.8rem; }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0.7rem 1.4rem;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.success { border-color: var(--success); color: var(--success); }
+    .toast.error { border-color: var(--danger); color: var(--danger); }
+
+    /* ── SETTINGS DRAWER ── */
+    .drawer-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 50;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .drawer-overlay.open { opacity: 1; pointer-events: all; }
+    .drawer {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-radius: 24px 24px 0 0;
+      padding: 1.5rem;
+      transform: translateY(100%);
+      transition: transform 0.35s cubic-bezier(0.32,0.72,0,1);
+      z-index: 51;
+    }
+    .drawer.open { transform: translateY(0); }
+    .drawer h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.2rem; }
+    .drawer-section { margin-bottom: 1.2rem; }
+    .drawer-section label { font-size: 0.82rem; color: var(--text2); margin-bottom: 0.4rem; display: block; }
+    .drawer-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-family: 'Heebo', sans-serif;
+      font-size: 0.9rem;
+      direction: ltr;
+    }
+    .drawer-input:focus { outline: none; border-color: var(--accent); }
+    .btn-save {
+      width: 100%;
+      padding: 0.9rem;
+      background: linear-gradient(135deg, var(--accent), #7b8fff);
+      border: none;
+      border-radius: 14px;
+      color: #fff;
+      font-family: 'Heebo', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+    .btn-logout {
+      width: 100%;
+      padding: 0.9rem;
+      background: transparent;
+      border: 1px solid var(--danger);
+      border-radius: 14px;
+      color: var(--danger);
+      font-family: 'Heebo', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 0.6rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════ AUTH SCREEN ═══════════════════════════════════ -->
+<div id="auth-screen">
+  <div class="logo-area">
+    <div class="logo-icon">🎙️</div>
+    <h1>VoiceList</h1>
+    <p>הוסף פריטים לרשימות שלך בקול</p>
+  </div>
+
+  <div class="auth-card">
+    <h2>חיבור ל-Google Tasks</h2>
+    <p>בצע את השלבים הבאים פעם אחת כדי לחבר את האפליקציה:</p>
+
+    <div class="step-list">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">
+          עבור ל-<a href="https://console.cloud.google.com" target="_blank">Google Cloud Console</a>
+          → צור פרויקט חדש → אפשר את <strong>Tasks API</strong>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">
+          צור <strong>OAuth 2.0 Client ID</strong> מסוג "Web application".
+          הוסף ל-Authorized origins את כתובת האתר שלך (או <code>http://localhost</code> לבדיקה)
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">העתק את <strong>Client ID</strong> והדבק למטה</div>
+      </div>
+    </div>
+
+    <input class="input-field" id="client-id-input" type="text"
+      placeholder="YOUR_CLIENT_ID.apps.googleusercontent.com" />
+
+    <button class="btn-primary" onclick="startAuth()">🔐 התחבר עם Google</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ MAIN APP ═════════════════════════════════════ -->
+<div id="app-screen">
+
+  <header>
+    <div class="header-logo">
+      <div class="icon">🎙️</div>
+      <span>VoiceList</span>
+    </div>
+    <div style="display:flex;gap:0.5rem;">
+      <button class="btn-icon" onclick="syncFromGoogle()" title="סנכרן">🔄</button>
+      <button class="btn-icon" onclick="openSettings()" title="הגדרות">⚙️</button>
+    </div>
+  </header>
+
+  <!-- LIST TABS -->
+  <div class="list-tabs" id="list-tabs">
+    <!-- generated by JS -->
+  </div>
+
+  <!-- VOICE BUTTON -->
+  <div class="voice-section">
+    <div class="voice-btn-wrap" id="voice-btn-wrap">
+      <div class="voice-btn-ring"></div>
+      <button class="voice-btn" id="voice-btn" onclick="toggleListen()">🎙️</button>
+    </div>
+    <div class="transcript-bubble" id="transcript-bubble">מדברים...</div>
+    <div class="voice-status" id="voice-status">לחץ להתחלת הקלטה</div>
+  </div>
+
+  <!-- MANUAL ADD -->
+  <div class="manual-row">
+    <input class="manual-input" id="manual-input"
+      placeholder="הוסף ידנית..."
+      onkeydown="if(event.key==='Enter') addManual()" />
+    <button class="btn-add" onclick="addManual()">＋</button>
+  </div>
+
+  <!-- ITEMS -->
+  <div class="items-section">
+    <div class="section-header">
+      <h3 id="list-title">רשימה</h3>
+      <button class="btn-clear" onclick="clearCompleted()">נקה שהושלמו</button>
+    </div>
+    <div class="items-list" id="items-list"></div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════ SETTINGS DRAWER ═══════════════════════════════ -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeSettings()"></div>
+<div class="drawer" id="settings-drawer">
+  <h3>⚙️ הגדרות</h3>
+
+  <div class="drawer-section">
+    <label>שם רשימת הקניות (ב-Google Tasks)</label>
+    <input class="drawer-input" id="setting-shopping" value="🛒 קניות" />
+  </div>
+  <div class="drawer-section">
+    <label>שם רשימת המטלות (ב-Google Tasks)</label>
+    <input class="drawer-input" id="setting-tasks" value="✅ מטלות" />
+  </div>
+
+  <button class="btn-save" onclick="saveSettings()">💾 שמור</button>
+  <button class="btn-logout" onclick="logout()">🚪 התנתק</button>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  CONFIG & STATE
+// ══════════════════════════════════════════════════════
+const SCOPES = 'https://www.googleapis.com/auth/tasks';
+let tokenClient = null;
+let accessToken = null;
+
+let lists = []; // { id, title, emoji, gtaskListId, items: [{id, text, done, gtaskId}] }
+let activeListIdx = 0;
+let recognition = null;
+let isListening = false;
+let finalTranscript = '';
+
+// ── keywords that map spoken phrases to list indices ──
+const LIST_KEYWORDS = {
+  0: ['קניות', 'קנייה', 'לקנות', 'סופר', 'מכולת'],
+  1: ['מטלות', 'מטלה', 'לעשות', 'משימות', 'משימה', 'todo'],
+};
+
+// ══════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════
+window.onload = () => {
+  const saved = localStorage.getItem('vl_token');
+  const clientId = localStorage.getItem('vl_client_id');
+  if (saved && clientId) {
+    accessToken = saved;
+    showApp();
+  }
+  loadLocalLists();
+};
+
+function loadLocalLists() {
+  const saved = localStorage.getItem('vl_lists');
+  if (saved) {
+    lists = JSON.parse(saved);
+  } else {
+    lists = [
+      { id: 'shopping', title: 'קניות', emoji: '🛒', gtaskListId: null, items: [] },
+      { id: 'tasks',    title: 'מטלות', emoji: '✅', gtaskListId: null, items: [] },
+    ];
+  }
+  renderTabs();
+  renderItems();
+}
+
+function saveLists() {
+  localStorage.setItem('vl_lists', JSON.stringify(lists));
+}
+
+// ══════════════════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════════════════
+function startAuth() {
+  const clientId = document.getElementById('client-id-input').value.trim();
+  if (!clientId) { showToast('הכנס Client ID תחילה', 'error'); return; }
+  localStorage.setItem('vl_client_id', clientId);
+
+  // Load GIS dynamically
+  const script = document.createElement('script');
+  script.src = 'https://accounts.google.com/gsi/client';
+  script.onload = () => {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: clientId,
+      scope: SCOPES,
+      callback: (resp) => {
+        if (resp.access_token) {
+          accessToken = resp.access_token;
+          localStorage.setItem('vl_token', accessToken);
+          showApp();
+          syncFromGoogle();
+        }
+      },
+    });
+    tokenClient.requestAccessToken();
+  };
+  document.head.appendChild(script);
+}
+
+function showApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'flex';
+  renderTabs();
+  renderItems();
+}
+
+function logout() {
+  localStorage.removeItem('vl_token');
+  accessToken = null;
+  closeSettings();
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app-screen').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════════
+//  GOOGLE TASKS API
+// ══════════════════════════════════════════════════════
+async function apiCall(url, method = 'GET', body = null) {
+  const opts = {
+    method,
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(url, opts);
+  if (res.status === 401) { logout(); return null; }
+  if (res.status === 204) return null;
+  return res.json();
+}
+
+async function syncFromGoogle() {
+  if (!accessToken) return;
+  showToast('🔄 מסנכרן...', '');
+  try {
+    const data = await apiCall('https://tasks.googleapis.com/tasks/v1/users/@me/lists');
+    if (!data) return;
+    const googleLists = data.items || [];
+
+    const shopName = localStorage.getItem('vl_shop_name') || '🛒 קניות';
+    const taskName = localStorage.getItem('vl_task_name') || '✅ מטלות';
+
+    for (const list of lists) {
+      const targetName = list.id === 'shopping' ? shopName : taskName;
+      let gList = googleLists.find(gl =>
+        gl.title === targetName || gl.title === list.title
+      );
+      if (!gList) {
+        gList = await apiCall(
+          'https://tasks.googleapis.com/tasks/v1/users/@me/lists',
+          'POST', { title: targetName }
+        );
+      }
+      list.gtaskListId = gList.id;
+
+      // Fetch tasks
+      const tasksData = await apiCall(
+        `https://tasks.googleapis.com/tasks/v1/lists/${gList.id}/tasks?showCompleted=true&maxResults=100`
+      );
+      const gtasks = (tasksData?.items || []).filter(t => t.title);
+      list.items = gtasks.map(t => ({
+        id: t.id,
+        text: t.title,
+        done: t.status === 'completed',
+        gtaskId: t.id,
+      }));
+    }
+    saveLists();
+    renderTabs();
+    renderItems();
+    showToast('✅ סונכרן בהצלחה', 'success');
+  } catch (e) {
+    showToast('שגיאה בסנכרון', 'error');
+  }
+}
+
+async function addTaskToGoogle(listIdx, text) {
+  const list = lists[listIdx];
+  if (!list.gtaskListId || !accessToken) return null;
+  const task = await apiCall(
+    `https://tasks.googleapis.com/tasks/v1/lists/${list.gtaskListId}/tasks`,
+    'POST', { title: text, status: 'needsAction' }
+  );
+  return task;
+}
+
+async function toggleTaskGoogle(listIdx, item) {
+  const list = lists[listIdx];
+  if (!list.gtaskListId || !accessToken || !item.gtaskId) return;
+  await apiCall(
+    `https://tasks.googleapis.com/tasks/v1/lists/${list.gtaskListId}/tasks/${item.gtaskId}`,
+    'PATCH',
+    { status: item.done ? 'completed' : 'needsAction' }
+  );
+}
+
+async function deleteTaskGoogle(listIdx, item) {
+  const list = lists[listIdx];
+  if (!list.gtaskListId || !accessToken || !item.gtaskId) return;
+  await apiCall(
+    `https://tasks.googleapis.com/tasks/v1/lists/${list.gtaskListId}/tasks/${item.gtaskId}`,
+    'DELETE'
+  );
+}
+
+// ══════════════════════════════════════════════════════
+//  ITEMS
+// ══════════════════════════════════════════════════════
+async function addItem(listIdx, text) {
+  const clean = text.trim();
+  if (!clean) return;
+  const item = { id: Date.now().toString(), text: clean, done: false, gtaskId: null };
+  lists[listIdx].items.unshift(item);
+  saveLists();
+  renderTabs();
+  renderItems();
+
+  if (accessToken) {
+    const task = await addTaskToGoogle(listIdx, clean);
+    if (task?.id) {
+      item.id = task.id;
+      item.gtaskId = task.id;
+      saveLists();
+    }
+  }
+  showToast(`✅ נוסף לרשימת ${lists[listIdx].emoji} ${lists[listIdx].title}`, 'success');
+}
+
+async function toggleItem(listIdx, itemId) {
+  const item = lists[listIdx].items.find(i => i.id === itemId);
+  if (!item) return;
+  item.done = !item.done;
+  saveLists();
+  renderItems();
+  if (accessToken) toggleTaskGoogle(listIdx, item);
+}
+
+async function deleteItem(listIdx, itemId) {
+  const item = lists[listIdx].items.find(i => i.id === itemId);
+  lists[listIdx].items = lists[listIdx].items.filter(i => i.id !== itemId);
+  saveLists();
+  renderTabs();
+  renderItems();
+  if (accessToken && item) deleteTaskGoogle(listIdx, item);
+}
+
+function clearCompleted() {
+  const list = lists[activeListIdx];
+  const toDelete = list.items.filter(i => i.done);
+  list.items = list.items.filter(i => !i.done);
+  saveLists();
+  renderTabs();
+  renderItems();
+  toDelete.forEach(item => {
+    if (accessToken) deleteTaskGoogle(activeListIdx, item);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  VOICE
+// ══════════════════════════════════════════════════════
+function setupRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    showToast('הדפדפן לא תומך בזיהוי קולי', 'error');
+    return false;
+  }
+  recognition = new SR();
+  recognition.lang = 'he-IL';
+  recognition.interimResults = true;
+  recognition.continuous = false;
+
+  recognition.onresult = (e) => {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    const display = finalTranscript + interim;
+    const bubble = document.getElementById('transcript-bubble');
+    bubble.textContent = display || 'מקשיב...';
+    bubble.classList.toggle('has-text', !!display);
+  };
+
+  recognition.onend = () => {
+    setListening(false);
+    if (finalTranscript.trim()) processVoice(finalTranscript.trim());
+    finalTranscript = '';
+  };
+
+  recognition.onerror = (e) => {
+    setListening(false);
+    finalTranscript = '';
+    if (e.error !== 'no-speech') showToast('שגיאת מיקרופון: ' + e.error, 'error');
+    setStatus('לחץ להתחלת הקלטה', '');
+  };
+
+  return true;
+}
+
+function toggleListen() {
+  if (isListening) {
+    recognition?.stop();
+    return;
+  }
+  if (!recognition && !setupRecognition()) return;
+  finalTranscript = '';
+  const bubble = document.getElementById('transcript-bubble');
+  bubble.textContent = 'מקשיב...';
+  bubble.classList.add('visible');
+  bubble.classList.remove('has-text');
+  recognition.start();
+  setListening(true);
+  setStatus('מקשיב... דבר עכשיו', 'active');
+}
+
+function setListening(v) {
+  isListening = v;
+  document.getElementById('voice-btn-wrap').classList.toggle('listening', v);
+  document.getElementById('voice-btn').textContent = v ? '⏹️' : '🎙️';
+  if (!v) {
+    document.getElementById('transcript-bubble').classList.remove('visible');
+  }
+}
+
+function processVoice(text) {
+  setStatus('מעבד...', 'active');
+
+  // Detect target list from keywords
+  let targetListIdx = activeListIdx;
+  const lower = text.toLowerCase();
+  for (const [idx, kws] of Object.entries(LIST_KEYWORDS)) {
+    if (kws.some(kw => lower.includes(kw))) {
+      targetListIdx = parseInt(idx);
+      break;
+    }
+  }
+
+  // Strip command words
+  let item = text
+    .replace(/תכניס|הוסף|הכנס|שים|תשים|תוסיף/g, '')
+    .replace(/לרשימת (קניות|מטלות|מטלה|קנייה|סופר)/g, '')
+    .replace(/לרשימה/g, '')
+    .replace(/קניות|מטלות|מטלה|לעשות|לקנות/g, '')
+    .trim();
+
+  if (!item) {
+    setStatus('לא הבנתי, נסה שוב', 'error');
+    return;
+  }
+
+  // Switch to detected list
+  activeListIdx = targetListIdx;
+  renderTabs();
+  renderItems();
+
+  addItem(targetListIdx, item);
+  setStatus(`נוסף: "${item}"`, 'success');
+  setTimeout(() => setStatus('לחץ להתחלת הקלטה', ''), 3000);
+}
+
+function setStatus(msg, cls = '') {
+  const el = document.getElementById('voice-status');
+  el.textContent = msg;
+  el.className = 'voice-status ' + cls;
+}
+
+// ══════════════════════════════════════════════════════
+//  MANUAL ADD
+// ══════════════════════════════════════════════════════
+function addManual() {
+  const input = document.getElementById('manual-input');
+  const text = input.value.trim();
+  if (!text) return;
+  addItem(activeListIdx, text);
+  input.value = '';
+}
+
+// ══════════════════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════════════════
+function renderTabs() {
+  const container = document.getElementById('list-tabs');
+  container.innerHTML = lists.map((list, i) => {
+    const pending = list.items.filter(x => !x.done).length;
+    return `
+      <button class="tab ${i === activeListIdx ? 'active' : ''}" onclick="switchList(${i})">
+        <span class="emoji">${list.emoji}</span>
+        ${list.title}
+        ${pending > 0 ? `<span class="count">${pending}</span>` : ''}
+      </button>`;
+  }).join('');
+}
+
+function renderItems() {
+  const list = lists[activeListIdx];
+  document.getElementById('list-title').textContent = `${list.emoji} ${list.title}`;
+  const container = document.getElementById('items-list');
+
+  if (!list.items.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="big">${list.emoji}</div>
+        <p>הרשימה ריקה<br/>לחץ על המיקרופון להוספה קולית</p>
+      </div>`;
+    return;
+  }
+
+  const pending = list.items.filter(i => !i.done);
+  const done    = list.items.filter(i => i.done);
+  const all = [...pending, ...done];
+
+  container.innerHTML = all.map(item => `
+    <div class="item-card ${item.done ? 'done' : ''}" id="item-${item.id}">
+      <button class="item-check" onclick="toggleItem(${activeListIdx},'${item.id}')">
+        ${item.done ? '✓' : ''}
+      </button>
+      <span class="item-text">${escHtml(item.text)}</span>
+      <button class="btn-delete" onclick="deleteItem(${activeListIdx},'${item.id}')">✕</button>
+    </div>
+  `).join('');
+}
+
+function switchList(idx) {
+  activeListIdx = idx;
+  renderTabs();
+  renderItems();
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ══════════════════════════════════════════════════════
+//  SETTINGS
+// ══════════════════════════════════════════════════════
+function openSettings() {
+  document.getElementById('settings-drawer').classList.add('open');
+  document.getElementById('drawer-overlay').classList.add('open');
+}
+function closeSettings() {
+  document.getElementById('settings-drawer').classList.remove('open');
+  document.getElementById('drawer-overlay').classList.remove('open');
+}
+function saveSettings() {
+  localStorage.setItem('vl_shop_name', document.getElementById('setting-shopping').value);
+  localStorage.setItem('vl_task_name', document.getElementById('setting-tasks').value);
+  closeSettings();
+  showToast('✅ הגדרות נשמרו', 'success');
+  if (accessToken) syncFromGoogle();
+}
+
+// ══════════════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════════════
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>
