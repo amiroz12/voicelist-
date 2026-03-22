@@ -489,7 +489,7 @@
       <span>VoiceList</span>
     </div>
     <div style="display:flex;gap:0.5rem;">
-      <button class="btn-icon" onclick="syncFromGoogle()" title="סנכרן">🔄</button>
+      <button class="btn-icon" onclick="forceSync()" title="סנכרן">🔄</button>
       <button class="btn-icon" onclick="openSettings()" title="הגדרות">⚙️</button>
     </div>
   </header>
@@ -576,10 +576,28 @@ window.onload = () => {
   const clientId = localStorage.getItem('vl_client_id');
   loadLocalLists();
   if (clientId) {
+    // הצג אפליקציה עם נתונים מקומיים מיד
     showApp();
+    // בקש טוקן חדש בשקט (ללא חלון) — אם נכשל, הצג כפתור התחברות
     loadGIS(() => {
-      initTokenClient(clientId, '', () => {
-        syncFromGoogle();
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: SCOPES,
+        prompt: '',
+        callback: (resp) => {
+          if (resp.access_token) {
+            accessToken = resp.access_token;
+            syncFromGoogle();
+          } else {
+            // טוקן שקט נכשל — בקש התחברות מחודשת
+            showToast('לחץ 🔄 להתחברות מחדש', 'error');
+          }
+        },
+        error_callback: (err) => {
+          if (err.type === 'popup_failed_to_open' || err.type === 'popup_closed') {
+            showToast('לחץ 🔄 להתחברות מחדש', 'error');
+          }
+        }
       });
       tokenClient.requestAccessToken();
     });
@@ -641,6 +659,25 @@ function startAuth() {
       syncFromGoogle();
     });
     tokenClient.requestAccessToken();
+  });
+}
+
+function forceSync() {
+  const clientId = localStorage.getItem('vl_client_id');
+  if (!clientId) { showToast('לא מחובר', 'error'); return; }
+  loadGIS(() => {
+    const tc = google.accounts.oauth2.initTokenClient({
+      client_id: clientId,
+      scope: SCOPES,
+      prompt: 'consent',
+      callback: (resp) => {
+        if (resp.access_token) {
+          accessToken = resp.access_token;
+          syncFromGoogle();
+        }
+      },
+    });
+    tc.requestAccessToken();
   });
 }
 
