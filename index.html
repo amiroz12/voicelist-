@@ -634,6 +634,13 @@ function showApp() {
   document.getElementById('app-screen').style.display = 'flex';
   renderTabs();
   renderItems();
+
+  // אם נפתח ממסך הבית (standalone PWA) — הפעל מיקרופון אוטומטית
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true;
+  if (isStandalone) {
+    setTimeout(() => toggleListen(), 800);
+  }
 }
 
 function logout() {
